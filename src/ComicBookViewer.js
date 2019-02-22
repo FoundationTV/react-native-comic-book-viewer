@@ -12,14 +12,37 @@ import ImageZoom from './image-zoom';
 import Header from './Header';
 import Footer from './Footer';
 
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'yellow',
+  },
+  imageZoom: {
+    backgroundColor: 'black',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  header: {
+    top: 0, position: 'absolute', zIndex: 9,
+  },
+  footer: {
+    bottom: 0, position: 'absolute', zIndex: 9,
+  },
+});
+
 type Props = {};
-const { width: viewportWidth, height: viewportHeight } = Dimensions.get('window');
 export default class ComicBookViewer extends Component<Props> {
   constructor(props) {
     super(props);
     this.listRef = React.createRef();
     this.state = {
-      width: 0, height: 0, seekerPosition: 0, fadeAnim: new Animated.Value(1), orientation: this.isPortrait() ? 'portrait' : 'landscape',
+      width: Dimensions.get('window').width,
+      height: Dimensions.get('window').height,
+      seekerPosition: 0,
+      fadeAnim: new Animated.Value(1),
+      orientation: this.isPortrait() ? 'portrait' : 'landscape',
     };
     const { pages, totalPages } = props;
     this.flipThreshold = 80;
@@ -59,7 +82,6 @@ export default class ComicBookViewer extends Component<Props> {
         width: window.width,
         height: window.height,
       });
-      console.log(this.state);
     });
   }
 
@@ -98,20 +120,12 @@ handleResponderRelease = (vx = 0, vy = 0) => {
     this.listRef.current.snapToNext();
   }
 
-  // console.log(`${vxRTL}, ${vyRTL}`);
-  // console.log(vxRTL >= -0.03 && vxRTL <= 0);
   if (vxRTL >= -0.03 && vxRTL <= 0) {
     this.resetPosition.call(this);
   }
 };
 
 resetPosition=() => {
-  console.log('here');
-  // this.positionXNumber = this.standardPositionX;
-  // Animated.timing(this.positionX, {
-  //   toValue: this.standardPositionX,
-  //   duration: 150,
-  // }).start();
   this.imageRefs[this.listRef.current.currentIndex].reset();
   this.listRef.current.forceUpdate();
 }
@@ -143,12 +157,7 @@ resetPosition=() => {
         horizontalOuterRangeOffset={this.handleHorizontalOuterRangeOffset}
         responderRelease={this.handleResponderRelease}
       >
-        <Animated.View style={{
-          backgroundColor: 'black',
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-        >
+        <Animated.View style={styles.imageZoom}>
           <Image source={{ uri: item.url }} style={{ width, height }} resizeMode="contain" resizeMethod="resize" />
         </Animated.View>
       </ImageZoom>
@@ -157,11 +166,12 @@ resetPosition=() => {
 
  handleLayout = (event) => {
    const { width, height } = this.state;
-   console.log(this.state);
-   console.log(event.nativeEvent.layout);
    if (event.nativeEvent.layout.width !== width) {
      this.hasLayout = true;
-     this.setState({ width: event.nativeEvent.layout.width, height: event.nativeEvent.layout.height });
+     this.setState({
+       width: event.nativeEvent.layout.width,
+       height: event.nativeEvent.layout.height,
+     });
    }
  };
 
@@ -169,17 +179,14 @@ resetPosition=() => {
    const {
      pages, totalPages, title, pubYear, issueNumber, onClose, comicType, vertical, inverted,
    } = this.props;
-   const { fadeAnim } = this.state;
+   const { fadeAnim, width, height } = this.state;
    return (
      <Animated.View
-       style={[styles.container]}
+       style={styles.container}
        onLayout={this.handleLayout}
      >
        <StatusBar hidden />
-       <Animated.View style={[{
-         top: 0, position: 'absolute', zIndex: 9, opacity: fadeAnim,
-       }]}
-       >
+       <Animated.View style={[styles.header, { opacity: fadeAnim }]}>
          <Header
            currentIndex={this.listRef.current?.currentIndex || 0}
            title={title}
@@ -194,11 +201,11 @@ resetPosition=() => {
          extraData={this.state}
          renderItem={this.renderItem}
          initialNumToRender={2}
-         sliderWidth={viewportWidth}
-         itemWidth={viewportWidth}
-         sliderHeight={viewportHeight}
-         itemHeight={viewportHeight}
-         slideStyle={{ width: viewportWidth }}
+         sliderWidth={width}
+         itemWidth={width}
+         sliderHeight={height}
+         itemHeight={height}
+         slideStyle={{ width }}
          inactiveSlideOpacity={1}
          inactiveSlideScale={1}
          vertical={vertical}
@@ -210,10 +217,7 @@ resetPosition=() => {
            });
          }}
        />
-       <Animated.View style={{
-         bottom: 0, position: 'absolute', zIndex: 9, opacity: fadeAnim,
-       }}
-       >
+       <Animated.View style={[styles.footer, { opacity: fadeAnim }]}>
          <Footer
            currentIndex={this.listRef.current?.currentIndex || 0}
            totalPages={totalPages}
@@ -225,12 +229,3 @@ resetPosition=() => {
    );
  }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'yellow',
-  },
-});
