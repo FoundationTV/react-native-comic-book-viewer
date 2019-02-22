@@ -1,5 +1,5 @@
 import React from 'react';
-import ComicBookViewer from './ComicBookViewer';
+import ComicBookViewer from './src';
 
 
 const images = [
