@@ -13,14 +13,13 @@ import Header from './Header';
 import Footer from './Footer';
 
 type Props = {};
-const circleRadius = 30;
 const { width: viewportWidth, height: viewportHeight } = Dimensions.get('window');
 export default class ComicBookViewer extends Component<Props> {
   constructor(props) {
     super(props);
     this.listRef = React.createRef();
     this.state = {
-      width: 0, height: 0, seekerPosition: 0, fadeAnim: new Animated.Value(1), orientation: null,
+      width: 0, height: 0, seekerPosition: 0, fadeAnim: new Animated.Value(1), orientation: this.isPortrait() ? 'portrait' : 'landscape',
     };
     const { pages, totalPages } = props;
     this.flipThreshold = 80;
@@ -54,18 +53,17 @@ export default class ComicBookViewer extends Component<Props> {
       this.state.fadeAnim,
       { toValue: 0, duration: 4000 },
     ).start();
-    Dimensions.addEventListener('change', ({ window, screen }) => {
-      console.log(window);
-      console.log(screen);
+    Dimensions.addEventListener('change', ({ window }) => {
       this.setState({
         orientation: this.isPortrait() ? 'portrait' : 'landscape',
+        width: window.width,
+        height: window.height,
       });
       console.log(this.state);
     });
   }
 
  handleClick = (arg) => {
-   console.log(arg);
    if (arg.locationX > 240) {
      this.listRef.current.snapToNext();
    } else if (arg.locationX < 120) {
@@ -98,7 +96,11 @@ handleResponderRelease = (vx = 0, vy = 0) => {
     this.listRef.current.snapToPrev();
   } else if (vyRTL < -0.7 && vertical) {
     this.listRef.current.snapToNext();
-  } else {
+  }
+
+  // console.log(`${vxRTL}, ${vyRTL}`);
+  // console.log(vxRTL >= -0.03 && vxRTL <= 0);
+  if (vxRTL >= -0.03 && vxRTL <= 0) {
     this.resetPosition.call(this);
   }
 };
@@ -115,17 +117,16 @@ resetPosition=() => {
 }
 
   renderItem = ({ item, index }) => {
-    const screenWidth = this.state.width;
-    const screenHeight = this.state.height;
+    const { width: screenWidth, height: screenHeight, orientation } = this.state;
     let width = 621;
     let height = 1218;
-    if (width > screenWidth) {
+    if (width > screenWidth && orientation === 'portrait') {
       const widthPixel = screenWidth / width;
       width *= widthPixel;
       height *= widthPixel;
     }
 
-    if (height > screenHeight) {
+    if (height > screenHeight && orientation === 'portrait') {
       const HeightPixel = screenHeight / height;
       width *= HeightPixel;
       height *= HeightPixel;
@@ -136,8 +137,8 @@ resetPosition=() => {
         cropWidth={screenWidth}
         cropHeight={screenHeight}
         onClick={this.handleClick}
-        imageWidth={screenWidth}
-        imageHeight={screenHeight}
+        imageWidth={orientation === 'portrait' ? screenWidth : 621}
+        imageHeight={orientation === 'portrait' ? screenHeight : 1218}
         enableCenterFocus={false}
         horizontalOuterRangeOffset={this.handleHorizontalOuterRangeOffset}
         responderRelease={this.handleResponderRelease}
@@ -156,6 +157,8 @@ resetPosition=() => {
 
  handleLayout = (event) => {
    const { width, height } = this.state;
+   console.log(this.state);
+   console.log(event.nativeEvent.layout);
    if (event.nativeEvent.layout.width !== width) {
      this.hasLayout = true;
      this.setState({ width: event.nativeEvent.layout.width, height: event.nativeEvent.layout.height });
