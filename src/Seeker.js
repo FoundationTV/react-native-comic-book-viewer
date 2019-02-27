@@ -1,7 +1,5 @@
 import * as React from 'react';
-import {
-  Dimensions, StyleSheet, View, PanResponder,
-} from 'react-native';
+import { Dimensions, StyleSheet, View } from 'react-native';
 
 const styles = StyleSheet.create({
   container: {

@@ -72,8 +72,9 @@ export default class ComicBookViewer extends Component<Props> {
   }
 
   componentDidMount() {
+    const { fadeAnim } = this.state;
     Animated.timing(
-      this.state.fadeAnim,
+      fadeAnim,
       { toValue: 0, duration: 4000 },
     ).start();
     Dimensions.addEventListener('change', ({ window }) => {
@@ -86,14 +87,15 @@ export default class ComicBookViewer extends Component<Props> {
   }
 
  handleClick = (arg) => {
+   const { fadeAnim } = this.state;
    if (arg.locationX > 240) {
      this.listRef.current.snapToNext();
    } else if (arg.locationX < 120) {
      this.listRef.current.snapToPrev();
    } else {
      Animated.timing(
-       this.state.fadeAnim,
-       { toValue: 1 - this.state.fadeAnim._value, duration: 500 },
+       fadeAnim,
+       { toValue: 1 - fadeAnim._value, duration: 500 },
      ).start();
    }
  };
@@ -165,7 +167,7 @@ resetPosition=() => {
   }
 
  handleLayout = (event) => {
-   const { width, height } = this.state;
+   const { width } = this.state;
    if (event.nativeEvent.layout.width !== width) {
      this.hasLayout = true;
      this.setState({
@@ -179,7 +181,9 @@ resetPosition=() => {
    const {
      pages, totalPages, title, pubYear, issueNumber, onClose, comicType, vertical, inverted,
    } = this.props;
-   const { fadeAnim, width, height } = this.state;
+   const {
+     fadeAnim, width, height, seekerPosition,
+   } = this.state;
    return (
      <Animated.View
        style={styles.container}
@@ -223,7 +227,7 @@ resetPosition=() => {
            currentIndex={this.listRef.current?.currentIndex || 0}
            totalPages={totalPages}
            seekPanResponder={this.seekPanResponder}
-           seekerPosition={this.state.seekerPosition}
+           seekerPosition={seekerPosition}
          />
        </Animated.View>
      </Animated.View>
