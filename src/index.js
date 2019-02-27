@@ -17,7 +17,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'yellow',
+    backgroundColor: 'black',
   },
   imageZoom: {
     backgroundColor: 'black',
@@ -216,6 +216,7 @@ resetPosition=() => {
              seekerPosition: (Dimensions.get('window').width - 20) * percent,
            });
          }}
+         {...this.props}
        />
        <Animated.View style={[styles.footer, { opacity: fadeAnim }]}>
          <Footer

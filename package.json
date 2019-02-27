@@ -1,6 +1,6 @@
 {
   "name": "react-native-comic-book-viewer",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Comic book reader / Sequential Image Viewer for React Native",
   "main": "src/index.js",
   "scripts": {
@@ -20,7 +20,7 @@
     "image",
     "viewer"
   ],
-  "author": "Mohammed Khateeb Kamran",
+  "author": "Mohammed Khateeb Kamran <khateeb@junctiontv.com> (http://junctiontv.com)",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/JunctionTV/react-native-comic-book-viewer/issues"
@@ -29,7 +29,6 @@
   "peerDependencies": {
     "react": "16.6.3",
     "react-native": "0.58.4",
-    "react-native-image-pan-zoom": "^2.1.11",
     "react-native-snap-carousel": "^3.7.5"
   },
   "devDependencies": {
