@@ -1,8 +1,8 @@
 # React Native Comic Book Reader
 
 <p align="center">
-    <img src="https://img.shields.io/npm/v/@junctiontv/react-native-comic-book-viewer.svg" />
-    <img src="https://img.shields.io/npm/dt/@junctiontv/react-native-comic-book-viewer.svg" />
+    <img src="https://img.shields.io/npm/v/react-native-comic-book-viewer.svg" />
+    <img src="https://img.shields.io/npm/dt/react-native-comic-book-viewer.svg" />
     <img src="https://img.shields.io/github/issues/JunctionTV/react-native-comic-book-viewer.svg" />
     <img src="https://img.shields.io/github/forks/JunctionTV/react-native-comic-book-viewer.svg" />
     <img src="https://img.shields.io/github/stars/JunctionTV/react-native-comic-book-viewer.svg" />
