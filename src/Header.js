@@ -29,7 +29,7 @@ const styles = StyleSheet.create({
 });
 
 const Header = ({
-  title, pubYear, issueNumber, onClose,
+  title, pubYear, issueNumber, onClose, currentIndex,
 }) => (
   <View style={styles.container}>
     <View style={styles.innerContainer}>
@@ -39,7 +39,7 @@ const Header = ({
       </Text>
       <Text style={styles.text}>{`Issue Number: ${issueNumber}`}</Text>
     </View>
-    <TouchableOpacity onPress={onClose}>
+    <TouchableOpacity onPress={() => onClose(currentIndex)}>
       <Image style={styles.button} source={closeIcon} />
     </TouchableOpacity>
   </View>

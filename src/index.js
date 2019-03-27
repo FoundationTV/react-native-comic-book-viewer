@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import {
+  ActivityIndicator,
   Animated,
   Dimensions,
-  Image,
   PanResponder,
   StatusBar,
   StyleSheet,
@@ -28,7 +28,17 @@ const styles = StyleSheet.create({
     top: 0, position: 'absolute', zIndex: 9,
   },
   footer: {
-    bottom: 0, position: 'absolute', zIndex: 9,
+    bottom: 50, position: 'absolute', zIndex: 9,
+  },
+  spinnerStyle: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
   },
 });
 
@@ -37,14 +47,17 @@ export default class ComicBookViewer extends Component<Props> {
   constructor(props) {
     super(props);
     this.listRef = React.createRef();
+    const { pages, totalPages } = props;
+    const loading = new Array(totalPages);
+    loading.fill(false);
     this.state = {
       width: Dimensions.get('window').width,
       height: Dimensions.get('window').height,
       seekerPosition: 0,
       fadeAnim: new Animated.Value(1),
       orientation: this.isPortrait() ? 'portrait' : 'landscape',
+      loading,
     };
-    const { pages, totalPages } = props;
     this.flipThreshold = 80;
     this.imageRefs = [];
     this.seekPanResponder = PanResponder.create({
@@ -134,33 +147,66 @@ resetPosition=() => {
 
   renderItem = ({ item, index }) => {
     const { width: screenWidth, height: screenHeight, orientation } = this.state;
-    let width = 621;
-    let height = 1218;
-    if (width > screenWidth && orientation === 'portrait') {
+    const { imageWidth, imageHeight } = this.props;
+    let width = imageWidth;
+    let height = imageHeight;
+    if (width > screenWidth) {
       const widthPixel = screenWidth / width;
       width *= widthPixel;
       height *= widthPixel;
     }
 
-    if (height > screenHeight && orientation === 'portrait') {
+    if (height > screenHeight) {
       const HeightPixel = screenHeight / height;
       width *= HeightPixel;
       height *= HeightPixel;
     }
+    // console.log(`screenWidth: ${screenWidth} ;screenHeight: ${screenHeight}`);
+    // console.log(`imageWidth: ${imageWidth} ;imageHeight: ${imageHeight}`);
+    // console.log(`width: ${width} ;height: ${height}`);
+
     return (
       <ImageZoom
         ref={ref => this.imageRefs[index] = ref}
         cropWidth={screenWidth}
         cropHeight={screenHeight}
         onClick={this.handleClick}
-        imageWidth={orientation === 'portrait' ? screenWidth : 621}
-        imageHeight={orientation === 'portrait' ? screenHeight : 1218}
+        imageWidth={(orientation === 'portrait' || imageWidth > screenWidth) ? screenWidth : imageWidth}
+        imageHeight={(orientation === 'portrait' || imageHeight > screenHeight) ? screenHeight : imageHeight}
         enableCenterFocus={false}
         horizontalOuterRangeOffset={this.handleHorizontalOuterRangeOffset}
         responderRelease={this.handleResponderRelease}
       >
         <Animated.View style={styles.imageZoom}>
-          <Image source={{ uri: item.url }} style={{ width, height }} resizeMode="contain" resizeMethod="resize" />
+          <Animated.Image
+            source={{ uri: item.url }}
+            style={{ width, height }}
+            resizeMode="contain"
+            resizeMethod="resize"
+            onLoadStart={() => this.setState((state) => {
+              const loading = state.loading.map((item, j) => {
+                if (j === index) return true;
+                return state.loading[j];
+              });
+              return { loading };
+            })}
+            onLoad={() => this.setState((state) => {
+              const loading = state.loading.map((item, j) => {
+                if (j === index) return false;
+                return state.loading[j];
+              });
+              return { loading };
+            })}
+            defaultSource={this.props.loadingIndicatorSource}
+          />
+          {this.state.loading[index] && (
+            <Animated.View style={styles.spinnerStyle}>
+              <ActivityIndicator
+                size="large"
+                color="#FFF"
+              />
+            </Animated.View>
+          )}
         </Animated.View>
       </ImageZoom>
     );
@@ -179,10 +225,10 @@ resetPosition=() => {
 
  render() {
    const {
-     pages, totalPages, title, pubYear, issueNumber, onClose, comicType, vertical, inverted,
+     pages, totalPages, title, pubYear, issueNumber, onClose, comicType, vertical, inverted, onPageChange,
    } = this.props;
    const {
-     fadeAnim, width, height, seekerPosition,
+     fadeAnim, width, height, seekerPosition, orientation,
    } = this.state;
    return (
      <Animated.View
@@ -219,10 +265,11 @@ resetPosition=() => {
            this.setState({
              seekerPosition: (Dimensions.get('window').width - 20) * percent,
            });
+           onPageChange(slideIndex);
          }}
          {...this.props}
        />
-       <Animated.View style={[styles.footer, { opacity: fadeAnim }]}>
+       <Animated.View style={[styles.footer, { opacity: fadeAnim }, orientation === 'portrait' ? {} : { bottom: 0 }]}>
          <Footer
            currentIndex={this.listRef.current?.currentIndex || 0}
            totalPages={totalPages}
