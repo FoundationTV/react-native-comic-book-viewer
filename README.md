@@ -30,7 +30,10 @@ import ComicBookViewer from "react-native-comic-book-viewer";
   pubYear={pub_year}
   totalPages={totalPage}
   issueNumber={number}
-  onClose={() => console.log('close pressed')}
+  onClose={index => console.log(index)}
+  imageWidth={720}
+  imageHeight={1280}
+  onPageChange={index => console.log(index)}
 />
 ```
 
@@ -42,9 +45,12 @@ import ComicBookViewer from "react-native-comic-book-viewer";
 | **`pubYear`**                                                                                                                                   | _String_ | :x:                | sets the publication year of the issue                                                                  |
 | **`totalPages`**                                                                                                                                | _String_ | :heavy_check_mark: | sets the total number of pages in the issue                                                             |
 | **`issueNumber`**                                                                                                                               | _String_ | :x:                | sets the number of the issue                                                                            |
-| **`onClose`**                                                                                                                                   | _String_ | :heavy_check_mark: | sets the function which is called when the cross button is pressed                                      |
+| **`onClose`**                                                                                                                                   | _Function_ | :heavy_check_mark: | sets the function which is called when the cross button is pressed; 1st argument is the index                                      |
 | **`vertical`**                                                                                                                                   | _Boolean_ | :x: | sets whether the pages are rendered vertically or horizontally (defaults to false)                                      |
 | **`inverted`**                                                                                                                                   | _Boolean_ | :x: | sets whether the direction of the pages are inverted or not (defaults to false)                                      |
+| **`imageWidth`**                                                                                                                                   | _Integer_ | :heavy_check_mark: | sets the width of the image                                      |
+| **`imageHeight`**                                                                                                                                   | _Integer_ | :heavy_check_mark: | sets the height of the image                                      |
+| **`onPageChange`**                                                                                                                                   | _Function_ | :x: | sets the function which is called when the page changes; 1st argument is the index                                      |
 
 
 ### Inherited props
