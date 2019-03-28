@@ -165,6 +165,8 @@ resetPosition=() => {
     // console.log(`imageWidth: ${imageWidth} ;imageHeight: ${imageHeight}`);
     // console.log(`width: ${width} ;height: ${height}`);
 
+    let loader = <ActivityIndicator style={styles.spinnerStyle} size="large" color="#FFF" />;
+    if (this.props.loader) loader = <Animated.Image source={this.props.loader} style={[styles.spinnerStyle, { width: 100, height: 100 }]} />;
     return (
       <ImageZoom
         ref={ref => this.imageRefs[index] = ref}
@@ -199,14 +201,7 @@ resetPosition=() => {
             })}
             defaultSource={this.props.loadingIndicatorSource}
           />
-          {this.state.loading[index] && (
-            <Animated.View style={styles.spinnerStyle}>
-              <ActivityIndicator
-                size="large"
-                color="#FFF"
-              />
-            </Animated.View>
-          )}
+          {this.state.loading[index] && loader}
         </Animated.View>
       </ImageZoom>
     );
@@ -263,7 +258,7 @@ resetPosition=() => {
          onSnapToItem={(slideIndex) => {
            const percent = slideIndex / totalPages;
            this.setState({
-             seekerPosition: (Dimensions.get('window').width - 20) * percent,
+             seekerPosition: (Dimensions.get('window').width - 40) * percent,
            });
            onPageChange(slideIndex);
          }}

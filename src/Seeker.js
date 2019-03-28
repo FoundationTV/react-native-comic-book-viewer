@@ -16,8 +16,8 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   fill: {
-    backgroundColor: '#FFF',
-    height: 1,
+    height: 4,
+    backgroundColor: '#7ed321',
     width: '100%',
   },
   handle: {
@@ -27,12 +27,13 @@ const styles = StyleSheet.create({
     width: 28,
   },
   circle: {
-    borderRadius: 12,
+    borderRadius: 11.5,
     position: 'relative',
-    top: 8,
+    top: 5,
     left: 8,
-    height: 12,
-    width: 12,
+    width: 23,
+    height: 23,
+    backgroundColor: '#d8d8d8',
   },
 });
 
@@ -44,7 +45,6 @@ const Seeker = ({ seekerFillWidth, seekColor, seekerPosition }) => (
           styles.fill,
           {
             width: seekerFillWidth || Dimensions.get('window').width - 40,
-            backgroundColor: seekColor || '#808080',
           },
         ]}
       />

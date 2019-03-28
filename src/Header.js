@@ -8,16 +8,20 @@ const closeIcon = require('./close-icon.png');
 const styles = StyleSheet.create({
   container: {
     width: Dimensions.get('window').width,
+    height: 46,
     backgroundColor: '#00000080',
     flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   innerContainer: { flexDirection: 'column', flex: 1, alignItems: 'center' },
   text: {
     fontFamily: 'Helvetica',
-    fontSize: 12,
-    fontWeight: 'normal',
+    fontSize: 14,
+    fontWeight: 'bold',
     fontStyle: 'normal',
     letterSpacing: 0,
+    textAlign: 'center',
     color: '#ffffff',
   },
   button: {
@@ -37,7 +41,7 @@ const Header = ({
         {title}
         {pubYear && ` (${pubYear})`}
       </Text>
-      <Text style={styles.text}>{`Issue Number: ${issueNumber}`}</Text>
+      <Text style={styles.text}>{`Issue ${issueNumber}`}</Text>
     </View>
     <TouchableOpacity onPress={() => onClose(currentIndex)}>
       <Image style={styles.button} source={closeIcon} />
