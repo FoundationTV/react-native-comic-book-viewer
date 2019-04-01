@@ -51,6 +51,7 @@ import ComicBookViewer from "react-native-comic-book-viewer";
 | **`imageWidth`**                                                                                                                                   | _Integer_ | :heavy_check_mark: | sets the width of the image                                      |
 | **`imageHeight`**                                                                                                                                   | _Integer_ | :heavy_check_mark: | sets the height of the image                                      |
 | **`onPageChange`**                                                                                                                                   | _Function_ | :x: | sets the function which is called when the page changes; 1st argument is the index                                      |
+| **`loader`**                                                                                                                                   | _Static Resource_ | :x: | sets a custom loader                                      |
 
 
 ### Inherited props
