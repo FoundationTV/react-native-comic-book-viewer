@@ -3,9 +3,11 @@ import {
   ActivityIndicator,
   Animated,
   Dimensions,
+  Image,
   PanResponder,
   StatusBar,
   StyleSheet,
+  View,
 } from 'react-native';
 import Carousel from 'react-native-snap-carousel';
 import ImageZoom from './image-zoom';
@@ -28,7 +30,7 @@ const styles = StyleSheet.create({
     top: 0, position: 'absolute', zIndex: 9,
   },
   footer: {
-    bottom: 50, position: 'absolute', zIndex: 9,
+    bottom: 0, position: 'absolute', zIndex: 9,
   },
   spinnerStyle: {
     flex: 1,
@@ -166,7 +168,7 @@ resetPosition=() => {
     // console.log(`width: ${width} ;height: ${height}`);
 
     let loader = <ActivityIndicator style={styles.spinnerStyle} size="large" color="#FFF" />;
-    if (this.props.loader) loader = <Animated.Image source={this.props.loader} style={[styles.spinnerStyle, { width: 100, height: 100 }]} />;
+    if (this.props.loader) loader = <View style={styles.spinnerStyle}><Image source={this.props.loader} style={{ width: 100, height: 100 }} /></View>;
     return (
       <ImageZoom
         ref={ref => this.imageRefs[index] = ref}
@@ -220,7 +222,7 @@ resetPosition=() => {
 
  render() {
    const {
-     pages, totalPages, title, pubYear, issueNumber, onClose, comicType, vertical, inverted, onPageChange,
+     pages, totalPages, title, pubYear, issueNumber, onClose, comicType, vertical, inverted, onPageChange, volumeNumber,
    } = this.props;
    const {
      fadeAnim, width, height, seekerPosition, orientation,
@@ -238,6 +240,7 @@ resetPosition=() => {
            pubYear={pubYear}
            issueNumber={issueNumber}
            onClose={onClose}
+           volumeNumber={volumeNumber}
          />
        </Animated.View>
        <Carousel

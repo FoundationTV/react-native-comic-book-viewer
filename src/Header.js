@@ -7,6 +7,7 @@ const closeIcon = require('./close-icon.png');
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     width: Dimensions.get('window').width,
     height: 46,
     backgroundColor: '#00000080',
@@ -33,12 +34,13 @@ const styles = StyleSheet.create({
 });
 
 const Header = ({
-  title, pubYear, issueNumber, onClose, currentIndex,
+  title, pubYear, issueNumber, onClose, currentIndex, volumeNumber,
 }) => (
   <View style={styles.container}>
     <View style={styles.innerContainer}>
       <Text style={styles.text}>
         {title}
+        {volumeNumber && ` vol ${volumeNumber}`}
         {pubYear && ` (${pubYear})`}
       </Text>
       <Text style={styles.text}>{`Issue ${issueNumber}`}</Text>
