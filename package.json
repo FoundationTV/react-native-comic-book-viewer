@@ -27,25 +27,25 @@
     "url": "https://github.com/JunctionTV/react-native-comic-book-viewer/issues"
   },
   "homepage": "https://github.com/JunctionTV/react-native-comic-book-viewer#readme",
-  "peerDependencies": {
-    "react": "^16.8.5",
-    "react-native": "^0.59.2",
+  "dependencies": {
+    "react": "^16.8.6",
+    "react-native": "^0.59.3",
     "react-native-snap-carousel": "^3.7.5"
   },
   "devDependencies": {
-    "@babel/core": "^7.4.0",
-    "@babel/runtime": "^7.4.2",
+    "@babel/core": "^7.4.3",
+    "@babel/runtime": "^7.4.3",
     "@react-native-community/eslint-config": "^0.0.3",
-    "babel-jest": "^24.5.0",
+    "babel-jest": "^24.7.0",
     "eslint": "^5.15.3",
     "eslint-config-airbnb": "^17.1.0",
     "eslint-plugin-import": "^2.16.0",
     "eslint-plugin-jsx-a11y": "^6.2.1",
     "eslint-plugin-react": "^7.12.4",
     "eslint-plugin-react-hooks": "^1.5.1",
-    "jest": "^24.5.0",
+    "jest": "^24.7.0",
     "metro-react-native-babel-preset": "^0.53.1",
-    "react-test-renderer": "^16.8.5"
+    "react-test-renderer": "^16.8.6"
   },
   "jest": {
     "preset": "react-native"
