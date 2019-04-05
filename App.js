@@ -26,12 +26,15 @@ const App = () => {
       pages={pages}
       pubYear={asset.details.pub_year}
       totalPages={asset.num_pages}
-      issueNumber={asset.series_num}
+      issueNumber={asset.details.episode}
+      volumeNumber={asset.series_num}
       comicType={asset.content_type}
       onClose={index => console.log(index)}
       imageWidth={1936}
       imageHeight={3056}
       onPageChange={index => console.log(index)}
+      onEndReached={info => console.log(info)}
+      onEndReachedThreshold={0.01}
     />
   );
 };

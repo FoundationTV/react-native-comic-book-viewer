@@ -115,6 +115,10 @@ export default class ComicBookViewer extends Component<Props> {
    }
  };
 
+ snapToItem = (index) => {
+   this.listRef.current.snapToItem(index);
+ }
+
  isPortrait = () => {
    const dim = Dimensions.get('screen');
    return dim.height >= dim.width;
@@ -138,7 +142,7 @@ handleResponderRelease = (vx = 0, vy = 0) => {
   }
 
   if (vxRTL >= -0.03 && vxRTL <= 0) {
-    this.resetPosition.call(this);
+    // this.resetPosition.call(this);
   }
 };
 
@@ -167,8 +171,15 @@ resetPosition=() => {
     // console.log(`imageWidth: ${imageWidth} ;imageHeight: ${imageHeight}`);
     // console.log(`width: ${width} ;height: ${height}`);
 
+    if (item.view) return item.view;
     let loader = <ActivityIndicator style={styles.spinnerStyle} size="large" color="#FFF" />;
-    if (this.props.loader) loader = <View style={styles.spinnerStyle}><Image source={this.props.loader} style={{ width: 100, height: 100 }} /></View>;
+    if (this.props.loader) {
+      loader = (
+        <View style={styles.spinnerStyle}>
+          <Image source={this.props.loader} style={{ width: 100, height: 100 }} />
+        </View>
+      );
+    }
     return (
       <ImageZoom
         ref={ref => this.imageRefs[index] = ref}
@@ -180,6 +191,7 @@ resetPosition=() => {
         enableCenterFocus={false}
         horizontalOuterRangeOffset={this.handleHorizontalOuterRangeOffset}
         responderRelease={this.handleResponderRelease}
+        doubleClickInterval={500}
       >
         <Animated.View style={styles.imageZoom}>
           <Animated.Image
