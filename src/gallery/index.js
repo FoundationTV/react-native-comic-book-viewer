@@ -63,15 +63,19 @@ export default class Gallery extends PureComponent {
     componentWillMount() {
       const onResponderReleaseOrTerminate = (evt, gestureState) => {
         if (this.activeResponder) {
-          console.log('gestureState1: '); console.log(gestureState);
-          const { inverted } = this.props;
+          // console.log('gestureState1: '); console.log(gestureState);
+          const { inverted, horizontal } = this.props;
+          // console.log(this.activeResponder === this.viewPagerResponder);
+          // console.log(gestureState);
           if (this.activeResponder === this.viewPagerResponder
                     && !this.shouldScrollViewPager(evt, gestureState)
                     && (
                       (!inverted && Math.abs(gestureState.vx) > 0.5)
                         || (inverted && Math.abs(gestureState.vx) < -0.5)
+                          || (horizontal && Math.abs(gestureState.vy) > 0.5)
                     )
           ) {
+            console.log(gestureState);
             this.activeResponder.onEnd(evt, gestureState, true);
             const vx = !inverted ? gestureState.vx : -gestureState.vx;
             this.getViewPagerInstance().flingToPage(this.currentPage, vx);
@@ -98,20 +102,35 @@ export default class Gallery extends PureComponent {
           }
           if (this.activeResponder === this.viewPagerResponder) {
             const dx = gestureState.moveX - gestureState.previousMoveX;
+            const dy = gestureState.moveY - gestureState.previousMoveY;
             const offset = this.getViewPagerInstance().getScrollOffsetFromCurrentPage();
-            console.log(`dx: ${dx}`);
-            console.log(`offset: ${offset}`);
-            console.log('gestureState'); console.log(gestureState);
-            if (dx > 0 && offset > 0 && !this.shouldScrollViewPager(evt, gestureState)) {
+            const { horizontal } = this.props;
+            // console.log(`dx: ${dx}`);
+            // console.log(`dy: ${dy}`);
+            // console.log(`offset: ${offset}`);
+            // console.log('gestureState'); console.log(gestureState);
+            if (horizontal && dx > 0 && offset > 0 && !this.shouldScrollViewPager(evt, gestureState)) {
               if (dx > offset) { // active image responder
                 this.getViewPagerInstance().scrollByOffset(offset);
                 gestureState.moveX -= offset;
                 this.activeImageResponder(evt, gestureState);
               }
-            } else if (dx < 0 && offset < 0 && !this.shouldScrollViewPager(evt, gestureState)) {
+            } else if (horizontal && dx < 0 && offset < 0 && !this.shouldScrollViewPager(evt, gestureState)) {
               if (dx < offset) { // active image responder
                 this.getViewPagerInstance().scrollByOffset(offset);
                 gestureState.moveX -= offset;
+                this.activeImageResponder(evt, gestureState);
+              }
+            } else if (!horizontal && dy > 0 && offset > 0 && !this.shouldScrollViewPager(evt, gestureState)) {
+              if (dy > offset) { // active image responder
+                this.getViewPagerInstance().scrollByOffset(offset);
+                gestureState.moveY -= offset;
+                this.activeImageResponder(evt, gestureState);
+              }
+            } else if (!horizontal && dy < 0 && offset < 0 && !this.shouldScrollViewPager(evt, gestureState)) {
+              if (dy < offset) { // active image responder
+                this.getViewPagerInstance().scrollByOffset(offset);
+                gestureState.moveY -= offset;
                 this.activeImageResponder(evt, gestureState);
               }
             }
@@ -217,18 +236,25 @@ export default class Gallery extends PureComponent {
 
       const space = viewTransformer.getAvailableTranslateSpace();
       const dx = gestureState.moveX - gestureState.previousMoveX;
-      const { inverted } = this.props;
+      const dy = gestureState.moveY - gestureState.previousMoveY;
+      const { inverted, horizontal } = this.props;
 
-      if (!inverted && dx > 0 && space.left <= 0 && this.currentPage > 0) {
+      if (horizontal && !inverted && dx > 0 && space.left <= 0 && this.currentPage > 0) {
         return true;
       }
-      if (!inverted && dx < 0 && space.right <= 0 && this.currentPage < this.pageCount - 1) {
+      if (horizontal && !inverted && dx < 0 && space.right <= 0 && this.currentPage < this.pageCount - 1) {
         return true;
       }
-      if (inverted && dx < 0 && space.right <= 0 && this.currentPage > 0) {
+      if (horizontal && inverted && dx < 0 && space.right <= 0 && this.currentPage > 0) {
         return true;
       }
-      if (inverted && dx > 0 && space.left <= 0 && this.currentPage < this.pageCount - 1) {
+      if (horizontal && inverted && dx > 0 && space.left <= 0 && this.currentPage < this.pageCount - 1) {
+        return true;
+      }
+      if (!horizontal && dy < 0 && space.top <= 0 && this.currentPage < this.pageCount - 1) {
+        return true;
+      }
+      if (!horizontal && dy > 0 && space.bottom <= 0 && this.currentPage > 0) {
         return true;
       }
       return false;

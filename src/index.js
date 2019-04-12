@@ -85,15 +85,28 @@ export default class ComicBookViewer extends Component<Props> {
   }
 
  handleClick = (arg) => {
-   const { fadeAnim, width, currentIndex } = this.state;
-   const { totalPages } = this.props;
-   if (arg.x0 > (width * 2 / 3)) {
+   const {
+     fadeAnim, width, height, currentIndex,
+   } = this.state;
+   const { totalPages, inverted, horizontal } = this.props;
+   if (
+     (horizontal && (
+       (!inverted && arg.x0 > (width * 2 / 3))
+      || (inverted && arg.x0 < (width / 3))
+     ))
+    || (!horizontal && arg.y0 > (height * 2 / 3))
+   ) {
      const newIndex = currentIndex < (totalPages - 1) ? currentIndex + 1 : currentIndex;
      this.currentIndex = newIndex;
      this.setState(({ currentIndex: newIndex }));
      this.listRef.current.getViewPagerInstance().flingToPage(newIndex, 1);
      this.footerRef.current.forceUpdate();
-   } else if (arg.x0 < (width / 3)) {
+   } else if (
+     (horizontal && (
+       (!inverted && arg.x0 < (width / 3))
+     || (inverted && arg.x0 > (width * 2 / 3))
+     )) || (!horizontal && arg.y0 < (height / 3))
+   ) {
      const newIndex = currentIndex > 0 ? currentIndex - 1 : currentIndex;
      this.currentIndex = newIndex;
      this.setState(({ currentIndex: newIndex }));

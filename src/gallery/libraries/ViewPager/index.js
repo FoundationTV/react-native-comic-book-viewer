@@ -161,7 +161,9 @@ export default class ViewPager extends PureComponent {
     onResponderRelease(evt, gestureState, disableSettle) {
       this.activeGesture = false;
       if (!disableSettle) {
-        this.settlePage(gestureState.vx);
+        const { horizontal } = this.props;
+        if (horizontal) this.settlePage(gestureState.vx);
+        else this.settlePage(gestureState.vy);
       }
     }
 
@@ -177,16 +179,21 @@ export default class ViewPager extends PureComponent {
     }
 
     settlePage(vx) {
-      const { pageDataArray, inverted } = this.props;
-      console.log(`vx: ${vx}; MIN_FLING_VELOCITY: ${MIN_FLING_VELOCITY}`);
+      const { pageDataArray, inverted, horizontal } = this.props;
 
-      if ((!inverted && vx < -MIN_FLING_VELOCITY) || (inverted && vx > MIN_FLING_VELOCITY)) {
+      if (
+        (horizontal && (!inverted && vx < -MIN_FLING_VELOCITY) || (inverted && vx > MIN_FLING_VELOCITY))
+        || (!horizontal && vx < -MIN_FLING_VELOCITY)
+      ) {
         if (this.currentPage < pageDataArray.length - 1) {
           this.flingToPage(this.currentPage + 1, vx);
         } else {
           this.flingToPage(pageDataArray.length - 1, vx);
         }
-      } else if ((!inverted && vx > MIN_FLING_VELOCITY) || (inverted && vx < -MIN_FLING_VELOCITY)) {
+      } else if (
+        (horizontal && (!inverted && vx > MIN_FLING_VELOCITY) || (inverted && vx < -MIN_FLING_VELOCITY))
+        || (!horizontal && vx > MIN_FLING_VELOCITY)
+      ) {
         if (this.currentPage > 0) {
           this.flingToPage(this.currentPage - 1, vx);
         } else {
@@ -212,12 +219,15 @@ export default class ViewPager extends PureComponent {
 
     flingToPage(page, velocityX) {
       this.onPageScrollStateChanged('settling');
+      const { horizontal } = this.props;
 
       page = this.validPage(page);
       this.onPageChanged(page);
 
       velocityX *= -1000; // per sec
       const finalX = this.getScrollOffsetOfPage(page);
+      // if (horizontal) this.scroller.fling(this.scroller.getCurrX(), 0, velocityX, 0, finalX, finalX, 0, 0);
+      // else this.scroller.fling(0, this.scroller.getCurrY(), 0, velocityX, 0, 0, finalX, finalX);
       this.scroller.fling(this.scroller.getCurrX(), 0, velocityX, 0, finalX, finalX, 0, 0);
     }
 
@@ -228,19 +238,24 @@ export default class ViewPager extends PureComponent {
       this.onPageChanged(page);
 
       const finalX = this.getScrollOffsetOfPage(page);
+      const { horizontal } = this.props;
       if (immediate) {
         InteractionManager.runAfterInteractions(() => {
           this.scroller.startScroll(this.scroller.getCurrX(), 0, finalX - this.scroller.getCurrX(), 0, 0);
+          // if (horizontal) this.scroller.startScroll(this.scroller.getCurrX(), 0, finalX - this.scroller.getCurrX(), 0, 0);
+          // else this.scroller.startScroll(0, this.scroller.getCurrY(), 0, finalX - this.scroller.getCurrY(), 0);
           this.refs.innerFlatList && this.refs.innerFlatList.scrollToOffset({ offset: finalX, animated: false });
           this.refs.innerFlatList && this.refs.innerFlatList.recordInteraction();
         });
-      } else {
-        this.scroller.startScroll(this.scroller.getCurrX(), 0, finalX - this.scroller.getCurrX(), 0, 400);
-      }
+      // } else if (horizontal) this.scroller.startScroll(this.scroller.getCurrX(), 0, finalX - this.scroller.getCurrX(), 0, 400);
+      // else this.scroller.startScroll(0, this.scroller.getCurrY(), 0, finalX - this.scroller.getCurrY(), 400);
+      } else this.scroller.startScroll(this.scroller.getCurrX(), 0, finalX - this.scroller.getCurrX(), 0, 400);
     }
 
     scrollByOffset(dx) {
-      const idx = this.props.inverted ? dx : -dx;
+      console.log(`dx: ${dx}`);
+      const { inverted, horizontal } = this.props;
+      const idx = (inverted || !horizontal) ? dx : -dx;
       this.scroller.startScroll(this.scroller.getCurrX(), 0, idx, 0, 0);
     }
 
@@ -251,7 +266,10 @@ export default class ViewPager extends PureComponent {
     }
 
     getScrollOffsetFromCurrentPage() {
+      const { horizontal } = this.props;
       return this.scroller.getCurrX() - this.getScrollOffsetOfPage(this.currentPage);
+      // if (horizontal) return this.scroller.getCurrX() - this.getScrollOffsetOfPage(this.currentPage);
+      // return this.scroller.getCurrY() - this.getScrollOffsetOfPage(this.currentPage);
     }
 
     getItemLayout(data, index) {
@@ -262,9 +280,17 @@ export default class ViewPager extends PureComponent {
       // unrendered / missing content. Therefore we work around it, as
       // described here
       // https://github.com/facebook/react-native/issues/15734#issuecomment-330616697
+      const { horizontal } = this.props;
+      if (horizontal) {
+        return {
+          length: this.state.width + this.props.pageMargin,
+          offset: (this.state.width + this.props.pageMargin) * index,
+          index,
+        };
+      }
       return {
-        length: this.state.width + this.props.pageMargin,
-        offset: (this.state.width + this.props.pageMargin) * index,
+        length: this.state.height + this.props.pageMargin,
+        offset: (this.state.height + this.props.pageMargin) * index,
         index,
       };
     }
