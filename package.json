@@ -28,8 +28,10 @@
   },
   "homepage": "https://github.com/JunctionTV/react-native-comic-book-viewer#readme",
   "dependencies": {
+    "@react-native-community/slider": "^1.0.4",
     "react": "^16.8.6",
     "react-native": "^0.59.3",
+    "react-native-image-gallery": "^2.1.5",
     "react-native-snap-carousel": "^3.7.5"
   },
   "devDependencies": {

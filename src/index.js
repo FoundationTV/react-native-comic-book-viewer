@@ -1,16 +1,11 @@
 import React, { Component } from 'react';
 import {
-  ActivityIndicator,
   Animated,
   Dimensions,
-  Image,
-  PanResponder,
   StatusBar,
   StyleSheet,
-  View,
 } from 'react-native';
-import Carousel from 'react-native-snap-carousel';
-import ImageZoom from './image-zoom';
+import Gallery from './gallery';
 import Header from './Header';
 import Footer from './Footer';
 
@@ -49,49 +44,30 @@ export default class ComicBookViewer extends Component<Props> {
   constructor(props) {
     super(props);
     this.listRef = React.createRef();
+    this.footerRef = React.createRef();
     const { pages, totalPages } = props;
     const loading = new Array(totalPages);
     loading.fill(false);
+    this.currentIndex = 0;
     this.state = {
       width: Dimensions.get('window').width,
       height: Dimensions.get('window').height,
-      seekerPosition: 0,
-      fadeAnim: new Animated.Value(1),
       orientation: this.isPortrait() ? 'portrait' : 'landscape',
-      loading,
+      isDisabled: false,
+      currentIndex: 0,
+      fadeAnim: new Animated.Value(1),
     };
-    this.flipThreshold = 80;
-    this.imageRefs = [];
-    this.seekPanResponder = PanResponder.create({
-      onStartShouldSetPanResponder: (evt, gestureState) => true,
-      onMoveShouldSetPanResponder: (evt, gestureState) => true,
-      onPanResponderGrant: (evt, gestureState) => true,
-      onPanResponderMove: (evt, gestureState) => {
-        const position = gestureState.moveX;
-        const { state } = this;
-
-        state.seekerFillWidth = position;
-        state.seekerPosition = position;
-
-        if (!state.seeking) {
-          state.seekerPosition = position;
-        }
-        this.setState(state);
-      },
-      onPanResponderRelease: (evt, gestureState) => {
-        const percent = this.state.seekerPosition / Dimensions.get('window').width;
-        const currentIndex = Math.floor(pages.length * percent);
-        this.listRef.current.snapToItem(currentIndex);
-      },
-    });
   }
 
   componentDidMount() {
     const { fadeAnim } = this.state;
     Animated.timing(
       fadeAnim,
-      { toValue: 0, duration: 4000 },
+      { toValue: 0, duration: 3000 },
     ).start();
+    this.setState(state => ({
+      isDisabled: !state.isDisabled,
+    }));
     Dimensions.addEventListener('change', ({ window }) => {
       this.setState({
         orientation: this.isPortrait() ? 'portrait' : 'landscape',
@@ -101,125 +77,49 @@ export default class ComicBookViewer extends Component<Props> {
     });
   }
 
+  handleSliderValueChange=(currentIndex) => {
+    this.setState({ currentIndex });
+    this.currentIndex = currentIndex;
+    this.listRef.current.getViewPagerInstance().flingToPage(currentIndex, 1);
+    this.props.onPageChange(currentIndex);
+  }
+
  handleClick = (arg) => {
-   const { fadeAnim } = this.state;
-   if (arg.locationX > 240) {
-     this.listRef.current.snapToNext();
-   } else if (arg.locationX < 120) {
-     this.listRef.current.snapToPrev();
+   const { fadeAnim, width, currentIndex } = this.state;
+   const { totalPages } = this.props;
+   if (arg.x0 > (width * 2 / 3)) {
+     const newIndex = currentIndex < (totalPages - 1) ? currentIndex + 1 : currentIndex;
+     this.currentIndex = newIndex;
+     this.setState(({ currentIndex: newIndex }));
+     this.listRef.current.getViewPagerInstance().flingToPage(newIndex, 1);
+     this.footerRef.current.forceUpdate();
+   } else if (arg.x0 < (width / 3)) {
+     const newIndex = currentIndex > 0 ? currentIndex - 1 : currentIndex;
+     this.currentIndex = newIndex;
+     this.setState(({ currentIndex: newIndex }));
+     this.listRef.current.getViewPagerInstance().flingToPage(newIndex, 1);
+     this.footerRef.current.forceUpdate();
    } else {
      Animated.timing(
        fadeAnim,
-       { toValue: 1 - fadeAnim._value, duration: 500 },
+       { toValue: 1 - fadeAnim._value, duration: 50 },
      ).start();
+     this.setState(state => ({
+       isDisabled: !state.isDisabled,
+     }));
    }
  };
 
  snapToItem = (index) => {
-   this.listRef.current.snapToItem(index);
+   this.listRef.current.getViewPagerInstance().flingToPage(index);
+   this.currentIndex = index;
+   this.footerRef.current.forceUpdate();
  }
 
  isPortrait = () => {
    const dim = Dimensions.get('screen');
    return dim.height >= dim.width;
  };
-
-handleResponderRelease = (vx = 0, vy = 0) => {
-  const { vertical, inverted } = this.props;
-
-  const vxRTL = inverted ? -vx : vx;
-  if (vxRTL > 0.7 && !vertical) {
-    this.listRef.current.snapToPrev();
-  } else if (vxRTL < -0.7 && !vertical) {
-    this.listRef.current.snapToNext();
-  }
-
-  const vyRTL = inverted ? -vy : vy;
-  if (vyRTL > 0.7 && vertical) {
-    this.listRef.current.snapToPrev();
-  } else if (vyRTL < -0.7 && vertical) {
-    this.listRef.current.snapToNext();
-  }
-
-  if (vxRTL >= -0.03 && vxRTL <= 0) {
-    // this.resetPosition.call(this);
-  }
-};
-
-resetPosition=() => {
-  this.imageRefs[this.listRef.current.currentIndex].reset();
-  this.listRef.current.forceUpdate();
-}
-
-  renderItem = ({ item, index }) => {
-    const { width: screenWidth, height: screenHeight, orientation } = this.state;
-    const { imageWidth, imageHeight } = this.props;
-    let width = imageWidth;
-    let height = imageHeight;
-    if (width > screenWidth) {
-      const widthPixel = screenWidth / width;
-      width *= widthPixel;
-      height *= widthPixel;
-    }
-
-    if (height > screenHeight) {
-      const HeightPixel = screenHeight / height;
-      width *= HeightPixel;
-      height *= HeightPixel;
-    }
-    // console.log(`screenWidth: ${screenWidth} ;screenHeight: ${screenHeight}`);
-    // console.log(`imageWidth: ${imageWidth} ;imageHeight: ${imageHeight}`);
-    // console.log(`width: ${width} ;height: ${height}`);
-
-    if (item.view) return item.view;
-    let loader = <ActivityIndicator style={styles.spinnerStyle} size="large" color="#FFF" />;
-    if (this.props.loader) {
-      loader = (
-        <View style={styles.spinnerStyle}>
-          <Image source={this.props.loader} style={{ width: 100, height: 100 }} />
-        </View>
-      );
-    }
-    return (
-      <ImageZoom
-        ref={ref => this.imageRefs[index] = ref}
-        cropWidth={screenWidth}
-        cropHeight={screenHeight}
-        onClick={this.handleClick}
-        imageWidth={(orientation === 'portrait' || imageWidth > screenWidth) ? screenWidth : imageWidth}
-        imageHeight={(orientation === 'portrait' || imageHeight > screenHeight) ? screenHeight : imageHeight}
-        enableCenterFocus={false}
-        horizontalOuterRangeOffset={this.handleHorizontalOuterRangeOffset}
-        responderRelease={this.handleResponderRelease}
-        doubleClickInterval={500}
-      >
-        <Animated.View style={styles.imageZoom}>
-          <Animated.Image
-            source={{ uri: item.url }}
-            style={{ width, height }}
-            resizeMode="contain"
-            resizeMethod="resize"
-            onLoadStart={() => this.setState((state) => {
-              const loading = state.loading.map((item, j) => {
-                if (j === index) return true;
-                return state.loading[j];
-              });
-              return { loading };
-            })}
-            onLoad={() => this.setState((state) => {
-              const loading = state.loading.map((item, j) => {
-                if (j === index) return false;
-                return state.loading[j];
-              });
-              return { loading };
-            })}
-            defaultSource={this.props.loadingIndicatorSource}
-          />
-          {this.state.loading[index] && loader}
-        </Animated.View>
-      </ImageZoom>
-    );
-  }
 
  handleLayout = (event) => {
    const { width } = this.state;
@@ -234,10 +134,10 @@ resetPosition=() => {
 
  render() {
    const {
-     pages, totalPages, title, pubYear, issueNumber, onClose, comicType, vertical, inverted, onPageChange, volumeNumber,
+     pages, totalPages, title, pubYear, issueNumber, onClose, comicType, horizontal, inverted, onPageChange, volumeNumber,
    } = this.props;
    const {
-     fadeAnim, width, height, seekerPosition, orientation,
+     fadeAnim, orientation, isDisabled, width,
    } = this.state;
    return (
      <Animated.View
@@ -247,44 +147,44 @@ resetPosition=() => {
        <StatusBar hidden />
        <Animated.View style={[styles.header, { opacity: fadeAnim }]}>
          <Header
-           currentIndex={this.listRef.current?.currentIndex || 0}
+           currentIndex={this.currentIndex || 0}
            title={title}
            pubYear={pubYear}
            issueNumber={issueNumber}
            onClose={onClose}
            volumeNumber={volumeNumber}
+           isDisabled={isDisabled}
+           width={width}
          />
        </Animated.View>
-       <Carousel
+       <Gallery
          ref={this.listRef}
-         data={pages}
-         extraData={this.state}
-         renderItem={this.renderItem}
-         initialNumToRender={2}
-         sliderWidth={width}
-         itemWidth={width}
-         sliderHeight={height}
-         itemHeight={height}
-         slideStyle={{ width }}
-         inactiveSlideOpacity={1}
-         inactiveSlideScale={1}
-         vertical={vertical}
-         inverted={inverted}
-         onSnapToItem={(slideIndex) => {
-           const percent = slideIndex / totalPages;
-           this.setState({
-             seekerPosition: (Dimensions.get('window').width - 40) * percent,
-           });
-           onPageChange(slideIndex);
+         style={{ flex: 1, backgroundColor: 'black' }}
+         images={pages}
+         onSingleTapConfirmed={(currentIndex, evt, gestureState) => {
+           this.currentIndex = currentIndex;
+           this.handleClick(gestureState);
          }}
-         {...this.props}
+         onPageSelected={(currentIndex) => {
+           this.setState({ currentIndex });
+           this.currentIndex = currentIndex;
+           onPageChange(currentIndex);
+           // console.log(this.currentIndex);
+           this.footerRef.current?.forceUpdate();
+         }}
+         horizontal={horizontal}
+         inverted={inverted}
+         // onPageScrollStateChanged={state => console.log(state)}
+         // onPageScroll={event => console.log(event)}
        />
        <Animated.View style={[styles.footer, { opacity: fadeAnim }, orientation === 'portrait' ? {} : { bottom: 0 }]}>
          <Footer
-           currentIndex={this.listRef.current?.currentIndex || 0}
+           ref={this.footerRef}
+           currentIndex={this.currentIndex || 0}
            totalPages={totalPages}
-           seekPanResponder={this.seekPanResponder}
-           seekerPosition={seekerPosition}
+           onValueChange={this.handleSliderValueChange}
+           isDisabled={isDisabled}
+           width={width}
          />
        </Animated.View>
      </Animated.View>
