@@ -1,9 +1,19 @@
 import React from 'react';
 import ComicBookViewer from './src';
 
+const loading = require('./src/placeholder_portrait.jpg');
+
 const asset = {
   id: 'zen_JungleBook_LOTS_01',
   title: 'Jungle Book: Last of the Species',
+  details: {
+    id: 'zen_JungleBook_LOTS_01',
+    title: 'Jungle Book: Last of the Species',
+    type: 'comic_issue',
+    episode: '1',
+    subscriber_type: 'free',
+    description: 'Mowglii has recovered from her wounds after defeating the ferocious Shere Khan, but she soon learns that on Kipling Isle, there is no down time!',
+  },
   content_type: 'western',
   series_num: 1,
   num_pages: 21,
@@ -17,23 +27,22 @@ const asset = {
 
 const App = () => {
   const pages = [];
-  for (let i = asset.start_page; i <= asset.end_page; i++) {
-    pages.push({ key: i, url: asset.page_api + i });
-  }
   return (
     <ComicBookViewer
       title={asset.title}
       pages={pages}
-      pubYear={asset.details.pub_year}
-      totalPages={asset.num_pages}
+      pubYear={asset.pub_year}
+      totalPages={pages.length}
       issueNumber={asset.details.episode}
       volumeNumber={asset.series_num}
       comicType={asset.content_type}
-      onClose={index => console.log(index)}
-      imageWidth={1936}
-      imageHeight={3056}
-      onPageChange={index => console.log(index)}
-      onEndReached={info => console.log(info)}
+      loadingIndicatorSource={loading}
+      imageWidth={621}
+      imageHeight={1218}
+      onPageChange={() => {}}
+      horizontal
+      inverted
+      // onEndReached={() => setModalVisible(true)}
       onEndReachedThreshold={0.01}
     />
   );
