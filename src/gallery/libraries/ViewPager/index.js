@@ -154,7 +154,10 @@ export default class ViewPager extends PureComponent {
     }
 
     onResponderMove(evt, gestureState) {
-      const dx = gestureState.moveX - gestureState.previousMoveX;
+      const { horizontal } = this.props;
+      const dx = horizontal
+        ? gestureState.moveX - gestureState.previousMoveX
+        : gestureState.previousMoveY - gestureState.moveY;
       this.scrollByOffset(dx);
     }
 
@@ -201,7 +204,9 @@ export default class ViewPager extends PureComponent {
         }
       } else {
         let page = this.currentPage;
-        const progress = (this.scroller.getCurrX() - this.getScrollOffsetOfPage(this.currentPage)) / this.state.width;
+        const progress = horizontal
+          ? (this.scroller.getCurrX() - this.getScrollOffsetOfPage(this.currentPage)) / this.state.width
+          : (this.scroller.getCurrX() - this.getScrollOffsetOfPage(this.currentPage)) / this.state.height;
         if (progress > 1 / 3) {
           page += 1;
         } else if (progress < -1 / 3) {
@@ -253,7 +258,6 @@ export default class ViewPager extends PureComponent {
     }
 
     scrollByOffset(dx) {
-      console.log(`dx: ${dx}`);
       const { inverted, horizontal } = this.props;
       const idx = (inverted || !horizontal) ? dx : -dx;
       this.scroller.startScroll(this.scroller.getCurrX(), 0, idx, 0, 0);

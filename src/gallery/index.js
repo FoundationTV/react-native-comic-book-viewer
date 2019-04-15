@@ -75,7 +75,7 @@ export default class Gallery extends PureComponent {
                           || (horizontal && Math.abs(gestureState.vy) > 0.5)
                     )
           ) {
-            console.log(gestureState);
+            // console.log(gestureState);
             this.activeResponder.onEnd(evt, gestureState, true);
             const vx = !inverted ? gestureState.vx : -gestureState.vx;
             this.getViewPagerInstance().flingToPage(this.currentPage, vx);
